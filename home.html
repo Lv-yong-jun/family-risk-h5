@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>家庭风险测评 - 平安财富康养规划</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);min-height:100vh;color:#333;line-height:1.7}
+.step{display:none;padding:20px 16px 100px;max-width:420px;margin:0 auto}
+.step.active{display:block}
+
+/* 进度条 */
+.progress-bar{height:4px;background:#e0e0e0;border-radius:2px;margin-bottom:20px;position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,#d4a574,#b8860b);border-radius:2px;transition:width .3s}
+.progress-text{text-align:center;font-size:12px;color:#999;margin-bottom:16px}
+
+/* 标题区 */
+.header{text-align:center;margin-bottom:24px}
+.header .icon{font-size:40px;margin-bottom:8px}
+.header h2{font-size:20px;color:#333;margin-bottom:6px}
+.header p{font-size:13px;color:#888;line-height:1.5}
+
+/* 卡片 */
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card-title{font-size:14px;font-weight:600;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* 表单 */
+.member-form input,.member-form select{width:100%;border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:10px;-webkit-appearance:none;background:#fff}
+.member-form input:focus,.member-form select:focus{border-color:#d4a574;outline:none}
+.btn-add{width:100%;padding:10px;background:linear-gradient(135deg,#d4a574,#b8860b);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.btn-add:active{opacity:.85}
+
+/* 成员列表 */
+.member-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8f9fa;border-radius:8px;margin-bottom:8px;font-size:14px}
+.member-item .info{flex:1}
+.member-item .name{font-weight:600}
+.member-item .meta{font-size:12px;color:#888}
+.member-item .delete{color:#e74c3c;font-size:18px;padding:4px 8px;cursor:pointer}
+
+/* 星级标签（替代红黄绿风险标签） */
+.star-tag{display:inline-flex;gap:1px;font-size:11px;align-items:center}
+.star-tag .star{color:#e0e0e0;font-size:13px}
+.star-tag .star.filled{color:#f5a623}
+.star-tag .stxt{margin-left:4px;color:#888;font-size:11px}
+
+/* 图表容器 */
+.chart-box{width:100%;height:260px;margin:12px 0;position:relative}
+.chart-box canvas{width:100%!important;height:100%!important}
+.grass-hat-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grass-hat-legend span{font-size:11px;display:flex;align-items:center;gap:4px}
+.grass-hat-legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+/* 标准普尔 */
+.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.sp-cell{background:#f8f9fa;border-radius:8px;padding:12px;text-align:center}
+.sp-cell .pct{font-size:22px;font-weight:700}
+.sp-cell .label{font-size:11px;color:#888;margin-top:4px}
+.sp-cell .desc{font-size:10px;color:#aaa;margin-top:4px}
+
+/* 滑动条 */
+.slider-group{margin-bottom:16px}
+.slider-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.slider-label span:last-child{color:#d4a574;font-weight:600}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:#e0e0e0;border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#d4a574;cursor:pointer}
+
+/* ===== 报告页样式（全面优化） ===== */
+
+/* 赞美卡片 - 金色温暖风 */
+.praise-card{background:linear-gradient(135deg,#fff9e6,#fef3cd);border:1px solid #f0d980;border-radius:12px;padding:16px;margin:10px 0}
+.praise-card .praise-icon{font-size:24px;text-align:center;margin-bottom:8px}
+.praise-card .praise-text{font-size:14px;color:#6b5a00;line-height:1.8;text-align:center}
+.prase-card .praise-sub{font-size:12px;color:#8b7500;text-align:center;margin-top:6px}
+
+/* 成员分析卡片 - 三段式 */
+.member-analysis{background:#fff;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #eee}
+.ma-praise{background:linear-gradient(135deg,#f8fcff,#eef6ff);border-radius:10px;padding:12px;margin-bottom:10px;border-left:3px solid #667eea}
+.ma-praise .ma-emoji{font-size:22px;text-align:center;margin-bottom:4px}
+.ma-praise .ma-text{font-size:14px;color:#1a3a6b;line-height:1.7;font-weight:500}
+.ma-bridge{font-size:13px;color:#666;text-align:center;padding:8px 0;border-top:1px dashed #ddd;border-bottom:1px dashed #ddd;margin:8px 0}
+.ma-suggestions{padding-left:4px}
+.ma-suggestion-item{padding:8px 10px;margin:6px 0;border-radius:8px;background:#fafbff;border-left:3px solid #d4a574;font-size:13px;color:#555;line-height:1.6}
+.ma-suggestion-item .si-priority{display:inline-flex;gap:1px;margin-right:4px;vertical-align:middle}
+.ma-suggestion-item .si-priority .st{color:#f5a623;font-size:12px}
+.ma-suggestion-item .si-title{font-weight:600;color:#333}
+.ma-suggestion-item .si-desc{font-size:12px;color:#777;margin-top:2px}
+
+/* 已有保障卡片 */
+.insured-card{background:linear-gradient(135deg,#f0faf0,#e8f5e9);border:1px solid #a5d6a7;border-radius:12px;padding:16px;margin:10px 0}
+.insured-card .ic-title{font-size:15px;font-weight:600;color:#2e7d32;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.insured-item{display:inline-block;padding:5px 12px;border-radius:16px;background:#fff;color:#2e7d32;font-size:13px;font-weight:500;margin:4px 4px 4px 0;border:1px solid #c8e6c9}
+.no-insured{font-size:13px;color:#999;font-style:italic;padding:8px 0}
+
+/* 亮点卡片 */
+.highlight-card{background:linear-gradient(135deg,#fff8e1,#ffecb3);border:1px solid #ffd54f;border-radius:12px;padding:16px;margin:10px 0}
+.highlight-card .hl-title{font-size:15px;font-weight:600;color:#e65100;margin-bottom:10px}
+.hl-item{font-size:13px;color:#555;padding:6px 0;line-height:1.6}
+.hl-item::before{content:'✨ ';margin-right:4px}
+
+/* 建议卡片 - 温和蓝调 */
+.advice-card{background:linear-gradient(135deg,#f5f7ff,#eef2ff);border:1px solid #bcc8ea;border-radius:12px;padding:14px;margin:8px 0}
+.advice-card .ac-member{font-size:14px;font-weight:600;color:#1a3a6b;margin-bottom:6px}
+.advice-card .ac-item{font-size:13px;color:#444;line-height:1.7;padding:4px 0}
+.advice-card .ac-positive{font-size:12px;color:#1565c0;margin-top:4px;font-style:italic}
+
+/* 评分徽章 - 温和配色 */
+.score-badge{display:inline-block;padding:8px 24px;border-radius:24px;font-size:18px;font-weight:700;letter-spacing:2px}
+.score-A{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);color:#1b5e20;border:2px solid #81c784}
+.score-B{background:linear-gradient(135deg,#fff9c4,#fff59d);color:#f57f17;border:2px solid #ffd54f}
+.score-C{background:linear-gradient(135deg,#ffe0b2,#ffcc80);color:#e65100;border:2px solid #ffb74d}
+.score-D{background:linear-gradient(135deg,#ffccbc,#ffab91);color:#bf360c;border:2px;color:#ff8a65}
+
+/* 按钮 */
+.btn-next{position:fixed;bottom:0;left:0;right:0;padding:14px;background:linear-gradient(135deg,#d4a574,#b8860b);color:#fff;border:none;font-size:16px;font-weight:600;cursor:pointer;z-index:100}
+.btn-next:active{opacity:.85}
+.btn-next.disabled{background:#ccc}
+
+/* 二维码 */
+.qr-card{text-align:center;background:linear-gradient(135deg,#fff9e6,#fff3cd);border:2px solid #d4a574;border-radius:12px;padding:20px;margin:16px 0}
+.qr-card .tip{font-size:14px;color:#8b6914;margin-bottom:10px;font-weight:600}
+.qr-card img{width:160px;height:160px;margin:0 auto;display:block;border-radius:8px}
+
+/* 家庭结构图 */
+.family-tree{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0}
+.family-gen{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.family-person{width:64px;text-align:center}
+.family-person .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 4px}
+.family-person .name{font-size:11px;color:#555}
+.family-person .age{font-size:10px;color:#999}
+.avatar-senior{background:#fce4ec}
+.avatar-adult{background:#e3f2fd}
+.avatar-child{background:#e8f5e9}
+.family-connector{width:2px;height:16px;background:#d4a574;margin:0 auto}
+
+/* 已有保障勾选区 */
+.insurance-check{margin-top:12px;padding:12px;background:#f8f9fa;border-radius:8px}
+.insurance-check .ic-header{font-size:13px;font-weight:600;color:#555;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.insurance-check .ic-body{display:none;margin-top:8px}
+.insurance-check .ic-body.show{display:block}
+.ic-row{display:flex;flex-wrap:wrap;gap:6px}
+.ic-chk{display:flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid #ddd;border-radius:16px;font-size:12px;color:#666;cursor:pointer;user-select:none;background:#fff}
+.ic-chk.sel{border-color:#667eea;background:#eef2ff;color:#3949ab;font-weight:600}
+.ic-chk input{display:none}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+
+<!-- STEP 1: 家庭成员输入 -->
+<div class="step active" id="step1">
+  <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+  <div class="progress-text">第 1/5 步 · 家庭成员信息</div>
+  <div class="header">
+    <div class="icon">👨👩👧👦</div>
+    <h2>请填写家庭成员信息</h2>
+    <p>我们将根据每位成员的年龄和关系，<br>为您量身定制家庭保障优化方案</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 添加家庭成员</div>
+    <div class="member-form" id="memberForm">
+      <input type="text" id="inputName" placeholder="称呼（如：爸爸、妈妈、小明）" maxlength="10">
+      <input type="number" id="inputAge" placeholder="年龄" min="0" max="120">
+      <select id="inputRelation">
+        <option value="">选择关系</option>
+        <option value="senior">长辈（祖父母/外祖父母）</option>
+        <option value="parent">本人/配偶（家庭支柱）</option>
+        <option value="child">子女</option>
+        <option value="other">其他亲属</option>
+      </select>
+
+      <!-- 新增：已有保障勾选 -->
+      <div class="insurance-check" id="insCheckArea">
+        <div class="ic-header" onclick="toggleInsCheck()">
+          <span>🛡️ 已有保障（选填，可多选）</span>
+          <span id="insArrow">▸</span>
+        </div>
+        <div class="ic-body" id="insBody">
+          <div class="ic-row" id="insOptions"></div>
+        </div>
+      </div>
+
+      <button class="btn-add" onclick="addMember()">＋ 添加成员</button>
+    </div>
+  </div>
+
+  <div class="card" id="memberListCard" style="display:none">
+    <div class="card-title">✅ 已添加成员</div>
+    <div class="member-list" id="memberList"></div>
+  </div>
+
+  <div class="card" style="background:#f0faf0;border:1px solid #c8e6c9;">
+    <div style="font-size:13px;color:#2e7d32;line-height:1.6;">
+      💡 <strong>建议：</strong>至少添加3位家庭成员（如夫妻+孩子），<br>可获得更完整的家庭保障分析
+    </div>
+  </div>
+
+  <button class="btn-next" onclick="goStep(2)">查看家庭结构图 →</button>
+</div>
+
+<!-- STEP 2: 家庭结构图 + 风险分析（赞美版） -->
+<div class="step" id="step2">
+  <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+  <div class="progress-text">第 2/5 步 · 家庭结构图</div>
+  <div class="header">
+    <div class="icon">🏠</div>
+    <h2>您的家庭结构</h2>
+    <p>每一位家人都是独一无二的珍宝</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗺️ 家庭结构图</div>
+    <div class="family-tree" id="familyTree"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💝 各成员保障分析</div>
+    <div id="memberRiskList"></div>
+  </div>
+
+  <button class="btn-next" onclick="goStep(3)">查看收入支出曲线 →</button>
+</div>
+
+<!-- STEP 3: 草帽图 -->
+<div class="step" id="step3">
+  <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+  <div class="progress-text">第 3/5 步 · 收入支出曲线（草帽图）</div>
+  <div class="header">
+    <div class="icon">🎩</div>
+    <h2>您的家庭收入支出曲线</h2>
+    <p>草帽图帮您看清一生的财务走势</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📈 生命周期收入-支出曲线</div>
+    <div class="chart-box"><canvas id="grassHatChart"></canvas></div>
+    <div class="grass-hat-legend" id="grassHatLegend"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 您的家庭当前阶段</div>
+    <div id="lifeStageAnalysis"></div>
+  </div>
+
+  <button class="btn-next" onclick="goStep(4)">查看资产配置诊断 →</button>
+</div>
+
+<!-- STEP 4: 标准普尔图 -->
+<div class="step" id="step4">
+  <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+  <div class="progress-text">第 4/5 步 · 资产配置诊断</div>
+  <div class="header">
+    <div class="icon">📊</div>
+    <h2>标准普尔家庭资产象限</h2>
+    <p>全球十万家庭验证的科学资产配置模型</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📐 您的资产配置（拖动滑块调整）</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>💰 日常开销账户</span><span id="spPct1">10%</span></div>
+      <input type="range" min="0" max="100" value="10" oninput="updateSP(this,1)">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>🛡️ 杠杆保障账户</span><span id="spPct2">20%</span></div>
+      <input type="range" min="0" max="100" value="20" oninput="updateSP(this,2)">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>📈 投资收益账户</span><span id="spPct3">30%</span></div>
+      <input type="range" min="0" max="100" value="30" oninput="updateSP(this,3)">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>🔒 长期理财账户</span><span id="spPct4">40%</span></div>
+      <input type="range" min="0" max="100" value="40" oninput="updateSP(this,4)">
+    </div>
+    <div style="text-align:center;font-size:12px;color:#999;margin-top:8px;" id="spTotal">合计：100%</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 标准普尔对比图</div>
+    <div class="chart-box"><canvas id="spChart"></canvas></div>
+  </div>
+
+  <div class="card" id="spDiagnosis">
+    <div class="card-title">🔎 资产配置诊断</div>
+    <div id="spDiagnosisContent"></div>
+  </div>
+
+  <button class="btn-next" onclick="generateReport()">生成保障优化报告 →</button>
+</div>
+
+<!-- STEP 5: 诊断报告（全面重构 - 情绪价值版） -->
+<div class="step" id="step5">
+  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  <div class="progress-text">第 5/5 步 · 保障优化报告</div>
+  <div class="header">
+    <div class="icon">📋</div>
+    <h2>您的家庭保障优化报告</h2>
+    <p>基于您提供的信息，我们为您定制了专属建议</p>
+  </div>
+
+  <!-- 综合评分（正面表述） -->
+  <div class="card" style="text-align:center;padding:24px 16px;">
+    <div style="font-size:13px;color:#999;margin-bottom:8px;">综合保障评估</div>
+    <div id="reportScore"></div>
+    <div style="font-size:14px;color:#666;margin-top:12px;line-height:1.7;" id="reportSummary"></div>
+  </div>
+
+  <!-- ✨ 家庭亮点（新增） -->
+  <div class="card">
+    <div class="card-title">✨ 您的家庭亮点</div>
+    <div id="reportHighlights"></div>
+  </div>
+
+  <!-- 🛡️ 已拥有保障（新增） -->
+  <div class="card">
+    <div class="card-title">🛡️ 已有保障清单</div>
+    <div id="reportInsured"></div>
+  </div>
+
+  <!-- 💡 优化建议（原风险缺口，改名+改语气） -->
+  <div class="card">
+    <div class="card-title">💡 保障优化建议</div>
+    <div id="reportAdvice"></div>
+  </div>
+
+  <!-- 二维码 -->
+  <div class="qr-card">
+    <div class="tip">📱 扫码添加规划师，获取专属保障方案</div>
+    <img src="qrcode-wechat.jpg" alt="微信二维码">
+    <div style="font-size:14px;color:#555;margin-top:10px;">吕勇军【平安金融科技集团】</div>
+  </div>
+
+  <div style="text-align:center;font-size:11px;color:#bbb;margin:16px 0;line-height:1.6;">
+    本测评结果仅供参考，具体保障方案请以专业规划师面对面沟通为准。<br>
+    本工具由平安保险规划师吕勇军提供
+  </div>
+
+  <button class="btn-next" onclick="shareResult()">📤 分享给家人</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ============ 全局数据 ============
+var familyMembers = [];
+var spValues = [10, 20, 30, 40];
+var grassHatChartInstance = null;
+var spChartInstance = null;
+
+// 已有保障选项
+var INS_OPTIONS = ['社保','公司补充医疗','百万医疗险','重疾险','意外险','定期寿险','养老年金','教育金','其他'];
+
+// 风险映射表（改为温和表述）
+var RISK_MAP = {
+  child: [
+    { label: '少儿健康保障', desc: '孩子成长过程中，一份健康保障能让父母更安心', level: 'high', positive: '补齐后，孩子的健康有了坚实后盾' },
+    { label: '意外防护', desc: '活泼好动的年纪，意外防护是给孩子的隐形守护', level: 'mid', positive: '让孩子自由探索世界的同时多一层安全网' },
+    { label: '教育金储备', desc: '提前为孩子规划未来，是父母最长情的告白', level: 'mid', positive: '孩子的每一步成长都有资金支持' }
+  ],
+  parent: [
+    { label: '家庭支柱保障', desc: '为家打拼的您值得拥有一份坚实的后盾', level: 'high', positive: '无论发生什么，家人的生活品质都不会下降' },
+    { label: '医疗费用补充', desc: '社保是基础，商业医疗险让就医选择更从容', level: 'high', positive: '享受更好的医疗资源，不用为费用纠结' },
+    { label: '养老品质规划', desc: '现在的每一分规划，都是未来的一份尊严', level: 'mid', positive: '退休后的生活依然精彩有品质' }
+  ],
+  senior: [
+    { label: '健康医疗保障', desc: '长辈的健康是全家最大的心愿', level: 'high', positive: '让父母的晚年更有底气、更有尊严' },
+    { label: '护理保障', desc: '久病床前无孝子？提前规划护理保障才是真孝顺', level: 'high', positive: '即使需要长期照护，也有专业资源和经济支持' },
+    { label: '意外骨折防护', desc: '长辈骨质脆弱，一份意外险是多一份安心', level: 'mid', positive: '跌倒摔伤不再成为经济负担' }
+  ],
+  other: [
+    { label: '基础保障覆盖', desc: '每位家人都值得被守护', level: 'mid', positive: '让保障不留死角' }
+  ]
+};
+
+// 赞美语料库
+var PRAISES = {
+  parent: function(name, age) {
+    if (age >= 45) return name + '是这个家庭的顶梁柱，辛苦打拼撑起整个家，非常了不起！';
+    if (age >= 35) return name + '正值事业黄金期，既是家庭的依靠，也是未来的希望！';
+    return name + '年轻有为，已经开始承担起家庭责任，前途无量！';
+  },
+  child: function(name, age) {
+    if (age >= 18) return name + '已经长大成人了，年轻就是最大的资本，未来有无限可能！';
+    if (age >= 6) return name + '正是茁壮成长的年纪，聪明可爱，是全家的开心果！';
+    return name + '还是个小宝贝，纯真的笑容就是全家最大的幸福！';
+  },
+  senior: function(name, age) {
+    return name + '操劳半生养育了下一代，现在该享清福了，您辛苦了！';
+  },
+  other: function(name, age) {
+    return name + '也是家庭重要的一员，有您的陪伴让这个家更完整！';
+  }
+};
+
+// 过渡语
+var BRIDGE_TEXTS = [
+  '正因为您对家人这么用心，我们一起来看看还有什么可以优化的地方',
+  '像您这样负责任的家长，一定也希望家人永远平平安安',
+  '保障不是担心出事，而是为了更安心地享受当下的幸福'
+];
+
+// ============ 已有保障勾选初始化 ============
+(function initInsCheck() {
+  var container = document.getElementById('insOptions');
+  INS_OPTIONS.forEach(function(opt) {
+    var el = document.createElement('label');
+    el.className = 'ic-chk';
+    el.innerHTML = '<input type="checkbox" data-v="' + opt + '">' + opt;
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      el.classList.toggle('sel');
+      el.querySelector('input').checked = el.classList.contains('sel');
+    });
+    container.appendChild(el);
+  });
+})();
+
+function toggleInsCheck() {
+  var body = document.getElementById('insBody');
+  var arrow = document.getElementById('insArrow');
+  body.classList.toggle('show');
+  arrow.textContent = body.classList.contains('show') ? '▾' : '▸';
+}
+
+function getSelectedInsurances() {
+  var checked = [];
+  document.querySelectorAll('#insOptions input:checked').forEach(function(el) {
+    checked.push(el.dataset.v);
+  });
+  return checked;
+}
+
+// ============ STEP 1: 家庭成员管理 ============
+function addMember() {
+  var name = document.getElementById('inputName').value.trim();
+  var age = parseInt(document.getElementById('inputAge').value);
+  var relation = document.getElementById('inputRelation').value;
+  if (!name || !age || !relation) { alert('请填写完整信息'); return; }
+  if (age < 0 || age > 120) { alert('请输入有效年龄'); return; }
+  familyMembers.push({ name: name, age: age, relation: relation, id: Date.now(), insurance: getSelectedInsurances() });
+  // 重置表单
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputAge').value = '';
+  document.getElementById('inputRelation').value = '';
+  document.querySelectorAll('#insOptions .ic-chk').forEach(function(el) { el.classList.remove('sel'); el.querySelector('input').checked = false; });
+  renderMemberList();
+}
+
+function removeMember(id) {
+  familyMembers = familyMembers.filter(function(m) { return m.id !== id; });
+  renderMemberList();
+}
+
+function renderMemberList() {
+  var card = document.getElementById('memberListCard');
+  var list = document.getElementById('memberList');
+  if (familyMembers.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = familyMembers.map(function(m) {
+    var relLabel = { senior: '长辈', parent: '支柱', child: '子女', other: '其他' }[m.relation];
+    var avatarClass = { senior: 'avatar-senior', parent: 'avatar-adult', child: 'avatar-child' }[m.relation] || 'avatar-adult';
+    var emoji = { senior: '👴', parent: '🧑', child: '👶' }[m.relation] || '👤';
+    var insTag = m.insurance && m.insurance.length ? ' <span style="font-size:10px;color:#2e7d32;">🛡️' + m.insurance.length + '项保障</span>' : '';
+    return '<div class="member-item fade-in">' +
+      '<div class="info" style="display:flex;align-items:center;gap:10px;">' +
+        '<div class="avatar ' + avatarClass + '" style="width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;">' + emoji + '</div>' +
+        '<div>' +
+          '<div class="name">' + m.name + ' <span style="font-size:11px;color:#999;font-weight:400;">（' + relLabel + '·' + m.age + '岁）</span>' + insTag + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="delete" onclick="removeMember(' + m.id + ')">✕</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ============ 步骤切换 ============
+function goStep(n) {
+  if (n === 2 && familyMembers.length < 1) { alert('请至少添加1位家庭成员'); return; }
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('step' + n).classList.add('active');
+  window.scrollTo(0, 0);
+  if (n === 2) renderFamilyTree();
+  if (n === 3) renderGrassHatChart();
+  if (n === 4) renderSPChart();
+}
+
+// ============ STEP 2: 家庭结构图 + 赞美版风险分析 ============
+function renderFamilyTree() {
+  var tree = document.getElementById('familyTree');
+  var seniors = familyMembers.filter(function(m) { return m.relation === 'senior'; });
+  var parents = familyMembers.filter(function(m) { return m.relation === 'parent'; });
+  var children = familyMembers.filter(function(m) { return m.relation === 'child'; });
+  var others = familyMembers.filter(function(m) { return !['senior','parent','child'].includes(m.relation); });
+
+  var html = '';
+  if (seniors.length) { html += '<div class="family-gen">' + seniors.map(personHtml).join('') + '</div>'; html += '<div class="family-connector"></div>'; }
+  if (parents.length) { html += '<div class="family-gen">' + parents.map(personHtml).join('') + '</div>'; html += '<div class="family-connector"></div>'; }
+  if (children.length) { html += '<div class="family-gen">' + children.map(personHtml).join('') + '</div>'; }
+  if (others.length) { html += '<div class="family-gen">' + others.map(personHtml).join('') + '</div>'; }
+  tree.innerHTML = html || '<div style="color:#999;font-size:13px;">请先添加家庭成员</div>';
+
+  // 渲染赞美版风险分析
+  var riskList = document.getElementById('memberRiskList');
+  riskList.innerHTML = familyMembers.map(function(m, idx) {
+    var risks = RISK_MAP[m.relation] || RISK_MAP.other;
+    var praiseFn = PRAISES[m.relation] || PRAISES.other;
+    var bridge = BRIDGE_TEXTS[idx % BRIDGE_TEXTS.length];
+
+    var suggestionsHtml = risks.map(function(r) {
+      var stars = r.level === 'high' ? '⭐⭐⭐' : r.level === 'mid' ? '⭐⭐' : '⭐';
+      return '<div class="ma-suggestion-item">' +
+        '<div><span class="si-priority"><span class="st">' + stars.split('').map(function(){return'<span class="st filled">⭐</span>'}).join('') + '</span>' +
+        '<span class="si-title">' + r.label + '</span></div>' +
+        '<div class="si-desc">' + r.desc + '</div>' +
+        '<div style="font-size:11px;color:#1565c0;margin-top:4px;">✨ ' + r.positive + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="member-analysis fade-in">' +
+      '<div class="ma-praise">' +
+        '<div class="ma-emoji">' + (m.relation === 'parent' ? '🌟' : m.relation === 'child' ? '🌱' : m.relation === 'senior' ? '🏮' : '💝') + '</div>' +
+        '<div class="ma-text">' + praiseFn(m.name, m.age) + '</div>' +
+      '</div>' +
+      '<div class="ma-bridge">' + bridge + '</div>' +
+      '<div class="ma-suggestions">' + suggestionsHtml + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function personHtml(m) {
+  var avatarClass = { senior: 'avatar-senior', parent: 'avatar-adult', child: 'avatar-child' }[m.relation] || 'avatar-adult';
+  var emoji = { senior: '👴', parent: '🧑', child: '👶' }[m.relation] || '👤';
+  return '<div class="family-person"><div class="avatar ' + avatarClass + '">' + emoji + '</div><div class="name">' + m.name + '</div><div class="age">' + m.age + '岁</div></div>';
+}
+
+// ============ STEP 3: 草帽图 ============
+function renderGrassHatChart() {
+  if (grassHatChartInstance) grassHatChartInstance.destroy();
+  var ctx = document.getElementById('grassHatChart').getContext('2d');
+
+  var parentMembers = familyMembers.filter(function(m) { return m.relation === 'parent'; });
+  var mainAge = parentMembers.length ? Math.min.apply(null, parentMembers.map(function(m) { return m.age; })) : 35;
+  var retireAge = 60, lifeExpectancy = 85, startWork = 25;
+
+  var labels = [], income = [], expense = [], net = [];
+  for (var age = startWork; age <= lifeExpectancy; age++) {
+    labels.push(age);
+    if (age < retireAge) {
+      var workYears = age - startWork, peak = retireAge - startWork;
+      var incomeVal = Math.round(100 * Math.sin(workYears / peak * Math.PI * 0.8) + 30);
+      income.push(Math.max(incomeVal, 20));
+    } else { income.push(0); }
+    var expVal = 40;
+    if (age > 65) expVal = 55; else if (age > 50) expVal = 50; else if (age < 30) expVal = 35;
+    expense.push(expVal);
+    net.push(income[income.length - 1] - expVal);
+  }
+
+  grassHatChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '收入', data: income, borderColor: '#27ae60', backgroundColor: 'rgba(39,174,96,0.1)', fill: true, tension: 0.4 },
+        { label: '支出', data: expense, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.1)', fill: true, tension: 0.4 },
+        { label: '结余', data: net, borderColor: '#d4a574', borderDash: [5,5], tension: 0.4, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+      scales: {
+        x: { title: { display: true, text: '年龄', font: { size: 11 } }, ticks: { font: { size: 9 }, maxTicksLimit: 10 } },
+        y: { title: { display: true, text: '金额（万元）', font: { size: 11 } }, ticks: { font: { size: 9 } }, min: -20 }
+      }
+    }
+  });
+
+  var stageDiv = document.getElementById('lifeStageAnalysis');
+  var stage = '', stageAdvice = '';
+  if (mainAge < 30) { stage = '🐣 成长期'; stageAdvice = '事业刚起步，收入较低但负担轻，应优先配置意外险和医疗险，保费低、杠杆高。'; }
+  else if (mainAge < 45) { stage = '🏃 奋斗期'; stageAdvice = '收入上升期，但家庭责任最重（房贷、子女教育、父母赡养）。此阶段保障需求最大，重点配置重疾险、定期寿险和医疗险。'; }
+  else if (mainAge < 60) { stage = '🏔️ 高压期'; stageAdvice = '收入高峰期，但身体机能下降。临近退休，需加速储备养老金，同时查漏补缺保障。'; }
+  else { stage = '🌅 退休期'; stageAdvice = '收入中断，医疗支出增加。重点防范大病风险和护理风险，确保养老金充足。'; }
+
+  var kidAges = familyMembers.filter(function(m) { return m.relation === 'child'; }).map(function(m) { return m.age; });
+  var eduBurden = '';
+  if (kidAges.length) {
+    var upcoming = kidAges.filter(function(a) { return a >= 3 && a <= 18; });
+    if (upcoming.length) eduBurden = '<div style="margin-top:8px;padding:8px;background:#fff3e0;border-radius:8px;font-size:13px;color:#e65100;">📚 您有' + upcoming.length + '个孩子正处于教育关键期（3-18岁），未来10年教育支出将大幅增加，提前储备教育金，给孩子最好的未来。</div>';
+  }
+
+  stageDiv.innerHTML = '<div style="font-size:16px;font-weight:600;color:#d4a574;margin-bottom:8px;">' + stage + '</div>' +
+    '<div style="font-size:13px;color:#666;line-height:1.7;">' + stageAdvice + '</div>' + eduBurden;
+}
+
+// ============ STEP 4: 标准普尔图（温和语气版） ============
+function updateSP(slider, idx) {
+  spValues[idx - 1] = parseInt(slider.value);
+  document.getElementById('spPct' + idx).textContent = spValues[idx - 1] + '%';
+  var total = spValues.reduce(function(a, b) { return a + b; }, 0);
+  var totalEl = document.getElementById('spTotal');
+  totalEl.textContent = '合计：' + total + '%';
+  totalEl.style.color = total === 100 ? '#27ae60' : '#e74c3c';
+  renderSPChart();
+}
+
+function renderSPChart() {
+  if (spChartInstance) spChartInstance.destroy();
+  var ctx = document.getElementById('spChart').getContext('2d');
+  var labels = ['日常开销\n（建议10%）', '杠杆保障\n（建议20%）', '投资收益\n（建议30%）', '长期理财\n（建议40%）'];
+  var suggested = [10, 20, 30, 40];
+  var colors = ['#42a5f5', '#66bb6a', '#ffa726', '#ab47bc'];
+
+  spChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '您的配置', data: spValues.slice(), backgroundColor: colors.map(function(c) { return c + '99'; }), borderColor: colors, borderWidth: 2 },
+        { label: '标准配置', data: suggested, backgroundColor: 'rgba(0,0,0,0.05)', borderColor: '#999', borderWidth: 1, borderDash: [5,5] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { font: { size: 10 }, callback: function(v) { return v + '%'; } }, title: { display: true, text: '占比', font: { size: 11 } } },
+        x: { ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+
+  // 温和诊断
+  var diag = document.getElementById('spDiagnosisContent');
+  var names = ['日常开销', '杠杆保障', '投资收益', '长期理财'];
+  var praises = [
+    '您在日常生活方面安排得井井有条 👍',
+    '保障意识非常棒！这是家庭的防火墙 🛡️',
+    '您有投资增值的眼光，很棒 📈',
+    '您懂得未雨绸缪，为长远做打算 🔒'
+  ];
+  var suggestions = ['保留3-6个月生活费即可，过多闲置有点可惜哦', '保障账户是家庭安全垫，适当加强会让全家更安心', '投资用闲钱就好，追求收益的同时注意风险分散', '养老金和教育金越早准备压力越小'];
+  var items = '';
+
+  spValues.forEach(function(v, i) {
+    var diff = v - suggested[i];
+    var status = Math.abs(diff) <= 5 ? 'ok' : diff < -10 ? 'risk' : diff > 10 ? 'warn' : 'ok';
+    items += '<div class="advice-card">' +
+      '<div style="font-size:13px;color:#1a3a6b;font-weight:600;">' + praises[i] + '</div>' +
+      '<div style="font-size:12px;color:#666;margin:4px 0;">当前配置 ' + v + '%，参考标准 ' + suggested[i] + '%</div>' +
+      (status !== 'ok' ? '<div style="font-size:12px;color:#d4a574;margin-top:4px;">💡 ' + suggestions[i] + '</div>' :
+       '<div style="font-size:12px;color:#27ae60;margin-top:4px;">✅ 配置合理，继续保持！</div>') +
+    '</div>';
+  });
+
+  if (spValues[1] < 15) {
+    items = '<div class="advice-card" style="border-color:#ffb74d;background:linear-gradient(135deg,#fff8e1,#ffecb3);">' +
+      '<div style="font-size:14px;color:#e65100;font-weight:600;">🌟 温馨提示</div>' +
+      '<div style="font-size:13px;color:#555;line-height:1.7;">您的保障账户占比 ' + spValues[1] + '%，如果可以的话建议提升到20%左右。这不是说现在有问题，而是给家人多一重安心——就像出门带把伞，不是为了盼下雨，而是为了下雨时从容不迫。</div>' +
+    '</div>' + items;
+  }
+  diag.innerHTML = items;
+}
+
+// ============ STEP 5: 生成报告（情绪价值版） ============
+function generateReport() {
+  goStep(5);
+
+  // 计算综合评分
+  var riskScore = 0, maxScore = 0;
+  familyMembers.forEach(function(m) {
+    var risks = RISK_MAP[m.relation] || [];
+    risks.forEach(function(r) {
+      maxScore += 3;
+      if (r.level === 'high') riskScore += 3;
+      else if (r.level === 'mid') riskScore += 2;
+    });
+  });
+  if (spValues[1] < 15) riskScore += 5;
+  var ratio = riskScore / (maxScore + 5);
+
+  var grade, gradeClass, summary, encourage;
+  if (ratio >= 0.7) { grade = 'D'; gradeClass = 'score-D'; summary = '您的家庭有很大的优化空间，这正是我们存在的意义——帮您把保障做得更周全。'; encourage = '别担心，每一步优化都是在为家人的幸福加码！'; }
+  else if (ratio >= 0.45) { grade = 'C'; gradeClass = 'score-C'; summary = '您的家庭已有一定保障意识，还有几个关键点可以进一步完善。'; encourage = '完善这几个方面后，您家的保障体系就相当扎实了！'; }
+  else if (ratio >= 0.25) { grade = 'B'; gradeClass = 'score-B'; summary = '您的家庭保障基础不错，细节上还有提升空间。'; encourage = '已经很棒了，再精进一下就更完美！'; }
+  else { grade = 'A'; gradeClass = 'score-A'; summary = '您的家庭保障做得相当到位，为您点赞！👍'; encourage = '保持定期检视的好习惯，让保障始终跟上家庭的变化。'; }
+
+  var gradeLabels = { A: '保障完善', B: '基础良好', C: '有提升空间', D: '优化空间较大' };
+  document.getElementById('reportScore').innerHTML = '<span class="score-badge ' + gradeClass + '">' + gradeLabels[grade] + '</span>';
+  document.getElementById('reportSummary').innerHTML = summary + '<br><br><span style="color:#d4a574;font-weight:500;">' + encourage + '</span>';
+
+  // ===== 家庭亮点 =====
+  var highlights = [];
+  if (familyMembers.length >= 3) highlights.push('您的家庭结构完整温馨，上有老下有小，这是人生最幸福的模样');
+  var hasInsurance = familyMembers.some(function(m) { return m.insurance && m.insurance.length > 0; });
+  if (hasInsurance) highlights.push('您已经有了一定的保障意识，为家人配置了部分保障，非常有远见！');
+  if (spValues[1] >= 15) highlights.push('您在保障方面的投入比例合理，说明您非常重视家庭安全');
+  if (spValues[3] >= 30) highlights.push('您注重长期规划，为未来做了充分准备');
+  var hasParent = familyMembers.some(function(m) { return m.relation === 'parent'; });
+  var hasChild = familyMembers.some(function(m) { return m.relation === 'child'; });
+  if (hasParent && hasChild) highlights.push('您既关心伴侣也关爱孩子，是一位非常有责任感的家长');
+  if (!hasInsurance && familyMembers.length > 0) highlights.push('您愿意花时间了解家庭保障状况，这份对家人的心意本身就值得肯定');
+  // 确保至少3条
+  if (highlights.length < 3) highlights.push('每一个认真对待家庭保障的人都值得尊敬，您就是这样的人');
+
+  document.getElementById('reportHighlights').innerHTML = '<div class="highlight-card"><div class="hl-title">✨</div>' +
+    highlights.slice(0, 5).map(function(h) { return '<div class="hl-item">' + h + '</div>'; }).join('') +
+  '</div>';
+
+  // ===== 已有保障清单 =====
+  var insuredHtml = '';
+  var anyInsured = false;
+  familyMembers.forEach(function(m) {
+    if (m.insurance && m.insurance.length > 0) {
+      anyInsured = true;
+      insuredHtml += '<div style="margin:8px 0;"><strong style="font-size:14px;color:#333;">' + m.name + '</strong>（' + m.age + '岁）<br>' +
+        '<div style="margin-top:6px;">' +
+        m.insurance.map(function(ins) { return '<span class="insured-item">✅ ' + ins + '</span>'; }).join('') +
+        '</div></div>';
+    }
+  });
+  if (!anyInsured) {
+    insuredHtml = '<div class="no-insured">本次测评暂未填写已有保障信息。如果您和家人已有社保或商业保险，欢迎扫码告知规划师，我们会将已有保障纳入综合分析。</div>';
+  }
+  document.getElementById('reportInsured').innerHTML = '<div class="insured-card"><div class="ic-title">🛡️</div>' + insuredHtml + '</div>';
+
+  // ===== 优化建议（温和版） =====
+  var adviceHtml = '';
+  familyMembers.forEach(function(m) {
+    var risks = RISK_MAP[m.relation] || [];
+    var memberRisks = risks.filter(function(r) {
+      // 如果已投保相关类型，降低优先级或跳过
+      if (!m.insurance) return true;
+      if (r.label.indexOf('重疾') > -1 && m.insurance.indexOf('重疾险') > -1) return false;
+      if (r.label.indexOf('医疗') > -1 && (m.insurance.indexOf('百万医疗险') > -1 || m.insurance.indexOf('公司补充医疗') > -1)) return false;
+      if (r.label.indexOf('意外') > -1 && m.insurance.indexOf('意外险') > -1) return false;
+      if (r.label.indexOf('养老') > -1 && m.insurance.indexOf('养老年金') > -1) return false;
+      if (r.label.indexOf('教育') > -1 && m.insurance.indexOf('教育金') > -1) return false;
+      return true;
+    });
+
+    if (memberRisks.length > 0) {
+      adviceHtml += '<div class="advice-card">';
+      adviceHtml += '<div class="ac-member">👤 ' + m.name + '（' + m.age + '岁）</div>';
+      memberRisks.forEach(function(r) {
+        var stars = r.level === 'high' ? '⭐⭐⭐ 建议优先' : '⭐⭐ 可以考虑';
+        adviceHtml += '<div class="ac-item">' +
+          '<strong>' + stars + '</strong> · ' + r.label + '<br>' +
+          '<span style="font-size:12px;color:#777;">' + r.desc + '</span>' +
+          '<div class="ac-positive">✨ ' + r.positive + '</div>' +
+        '</div>';
+      });
+      adviceHtml += '</div>';
+    }
+  });
+
+  // 保障账户整体建议
+  if (spValues[1] < 20) {
+    adviceHtml += '<div class="advice-card" style="border-color:#ffd54f;background:linear-gradient(135deg,#fff8e1,#ffecb3);">' +
+      '<div class="ac-member">🏠 家庭整体 · 杠杆保障账户</div>' +
+      '<div class="ac-item">当前保障账户占比 ' + spValues[1] + '%，建议逐步提升至20%左右。<br>' +
+      '<span style="font-size:12px;color:#777;">保障不是消费，而是对家人的承诺。适当的保障投入，换来的是整个家庭面对未知时的从容与底气。</span></div>' +
+      '<div class="ac-positive">✨ 补齐后，无论风雨来袭，您都能从容应对</div>' +
+    '</div>';
+  }
+
+  // 下一步行动
+  adviceHtml += '<div class="advice-card" style="text-align:center;">' +
+    '<div style="font-size:14px;color:#1a3a6b;font-weight:600;margin-bottom:8px;">📞 下一步怎么做？</div>' +
+    '<div style="font-size:13px;color:#555;line-height:1.8;">每个人的家庭情况都不同，以上建议是基于通用模型的初步分析。<br>如需获取针对您家庭的<strong>一对一专属方案</strong>，欢迎扫码联系规划师。</div>' +
+  '</div>';
+
+  document.getElementById('reportAdvice').innerHTML = adviceHtml;
+}
+
+// ============ 分享 ============
+function shareResult() {
+  if (navigator.share) {
+    navigator.share({ title: '家庭保障优化报告', text: '我的家庭保障测评完成啦，一起来看看！', url: location.href });
+  } else {
+    alert('请截图保存报告，分享给家人');
+  }
+}
+</script>
+</body>
+</html>
